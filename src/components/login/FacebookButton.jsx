@@ -1,4 +1,5 @@
 import { Button } from "@mantine/core";
+import { loginWithFacebook } from "../../firebase/config";
 
 function FacebookIcon(props) {
   return (
@@ -16,8 +17,21 @@ function FacebookIcon(props) {
 }
 
 export function FacebookButton(props) {
+  const handleFbLogin = async () => {
+    try {
+      await loginWithFacebook();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return (
-    <Button leftSection={<FacebookIcon />} variant="default" {...props}>
+    <Button
+      leftSection={<FacebookIcon />}
+      variant="default"
+      {...props}
+      onClick={handleFbLogin}
+    >
       Facebook
     </Button>
   );

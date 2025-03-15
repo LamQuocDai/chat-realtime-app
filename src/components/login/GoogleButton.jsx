@@ -1,4 +1,5 @@
 import { Button } from "@mantine/core";
+import { loginWithGoogle } from "../../firebase/config";
 
 function GoogleIcon(props) {
   return (
@@ -30,5 +31,20 @@ function GoogleIcon(props) {
 }
 
 export function GoogleButton(props) {
-  return <Button leftSection={<GoogleIcon />} variant="default" {...props} />;
+  const handleGgLogin = async () => {
+    try {
+      await loginWithGoogle();
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  return (
+    <Button
+      leftSection={<GoogleIcon />}
+      variant="default"
+      {...props}
+      onClick={handleGgLogin}
+    />
+  );
 }
