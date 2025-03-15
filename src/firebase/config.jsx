@@ -8,6 +8,8 @@ import {
   onAuthStateChanged,
   signOut,
   GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -54,6 +56,28 @@ const loginWithGoogle = async () => {
   }
 };
 
+const regiterWithEmailAndPassword = async (email, password) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+    console.log(user);
+    console.log("User regiter successfully");
+  } catch (error) {
+    if (error.code === "auth/email-already-in-use") {
+      try {
+        console.log("email is regitered");
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    throw error;
+  }
+};
+
 const db = getFirestore();
 
 export {
@@ -63,6 +87,7 @@ export {
   onAuthStateChanged,
   signOut,
   loginWithGoogle,
+  regiterWithEmailAndPassword,
   db,
 };
 export default app;

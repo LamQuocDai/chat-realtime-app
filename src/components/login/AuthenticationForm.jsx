@@ -14,9 +14,14 @@ import { useForm } from "@mantine/form";
 import { upperFirst, useToggle } from "@mantine/hooks";
 import { GoogleButton } from "./GoogleButton";
 import { FacebookButton } from "./FacebookButton"; // Đổi từ TwitterButton sang FacebookButton
+import { regiterWithEmailAndPassword } from "../../firebase/config";
+import { useState } from "react";
 
 export default function AuthenticationForm(props) {
   const [type, toggle] = useToggle(["login", "register"]);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const form = useForm({
     initialValues: {
       email: "",
@@ -34,6 +39,18 @@ export default function AuthenticationForm(props) {
     },
   });
 
+  const handleRegiterUser = async () => {
+    try {
+      console.log("Hello, world");
+      await regiterWithEmailAndPassword(
+        form.values.email,
+        form.values.password
+      );
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return (
     <Paper radius="md" p="xl" withBorder {...props}>
       <Text size="lg" fw={500}>
@@ -47,7 +64,11 @@ export default function AuthenticationForm(props) {
 
       <Divider label="Or continue with email" labelPosition="center" my="lg" />
 
-      <form onSubmit={form.onSubmit(() => {})}>
+      <form
+        onSubmit={form.onSubmit(() => {
+          handleRegiterUser();
+        })}
+      >
         <Stack>
           {type === "register" && (
             <TextInput
