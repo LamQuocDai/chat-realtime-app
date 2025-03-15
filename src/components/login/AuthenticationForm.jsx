@@ -14,14 +14,13 @@ import { useForm } from "@mantine/form";
 import { upperFirst, useToggle } from "@mantine/hooks";
 import { GoogleButton } from "./GoogleButton";
 import { FacebookButton } from "./FacebookButton"; // Đổi từ TwitterButton sang FacebookButton
-import { regiterWithEmailAndPassword } from "../../firebase/config";
-import { useState } from "react";
+import {
+  registerWithEmailAndPassword,
+  loginWithEmailAndPassword,
+} from "../../firebase/config";
 
 export default function AuthenticationForm(props) {
   const [type, toggle] = useToggle(["login", "register"]);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   const form = useForm({
     initialValues: {
       email: "",
@@ -39,13 +38,20 @@ export default function AuthenticationForm(props) {
     },
   });
 
-  const handleRegiterUser = async () => {
+  const handleSubmit = async () => {
     try {
-      console.log("Hello, world");
-      await regiterWithEmailAndPassword(
-        form.values.email,
-        form.values.password
-      );
+      if (type === "register") {
+        await registerWithEmailAndPassword(
+          form.values.email,
+          form.values.password,
+          form.values.name
+        );
+      } else {
+        await loginWithEmailAndPassword(
+          form.values.email,
+          form.values.password
+        );
+      }
     } catch (error) {
       throw error;
     }
@@ -66,7 +72,7 @@ export default function AuthenticationForm(props) {
 
       <form
         onSubmit={form.onSubmit(() => {
-          handleRegiterUser();
+          handleSubmit();
         })}
       >
         <Stack>
