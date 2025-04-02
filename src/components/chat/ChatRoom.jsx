@@ -1,28 +1,23 @@
 import { ScrollArea } from "@mantine/core";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Message from "./message";
+import { AppContext } from "../context/AppProvider";
+import { AuthContext } from "../context/AuthProvider";
 
 const ChatRoom = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      displayName: "Alice",
-      text: "Hey! How's it going?",
-      photoURL: null,
-      createAt: 1231231,
-    },
-    {
-      id: 2,
-      displayName: "You",
-      text: "All good! How about you?",
-      photoURL: null,
-      createAt: 1231231,
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
+  const { selectedUSer } = useContext(AppContext);
+  const { currentUser } = useContext(AuthContext);
+
+  if (!selectedUSer) {
+    return (
+      <ScrollArea className="flex-1 p-4 space-y-2 bg-gray-50"></ScrollArea>
+    );
+  }
 
   return (
-    <ScrollArea className="flex-1 p-4 space-y-2 bg-gray-50 justify-end">
-      {messages.map((msg) => (
+    <ScrollArea className="flex-1 p-4 space-y-2 bg-gray-50 justify-items-end">
+      {/* {messages.map((msg) => (
         <div
           key={msg.id}
           className={`p-3 rounded-lg w-fit shadow-md ${
@@ -38,6 +33,23 @@ const ChatRoom = () => {
             photoURL={msg.photoURL}
           />
         </div>
+      ))} */}
+      {messages.map((msg) => (
+        <Message
+          key={msg.id}
+          text={msg.text}
+          displayName={
+            msg.senderId === currentUser.uid
+              ? currentUser.displayName
+              : selectedUser.displayName
+          }
+          createAt={new Date(msg.createAt).toLocaleTimeString()}
+          photoURL={
+            msg.senderId === currentUser.uid
+              ? currentUser.photoURL
+              : selectedUser.photoURL
+          }
+        />
       ))}
     </ScrollArea>
   );

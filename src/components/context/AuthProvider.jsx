@@ -6,7 +6,7 @@ import { Loader } from "@mantine/core";
 export const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState({});
+  const [currentUser, setCurrentUser] = useState({});
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -14,12 +14,12 @@ const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         const { displayName, email, uid, photoURL } = currentUser;
-        setUser({ displayName, email, uid, photoURL });
+        setCurrentUser({ displayName, email, uid, photoURL });
         setIsLoading(false);
         navigate("/");
         return;
       }
-      setUser(null);
+      setCurrentUser(null);
       setIsLoading(false);
       navigate("/login");
     });
@@ -28,7 +28,7 @@ const AuthProvider = ({ children }) => {
   }, [navigate]);
 
   return (
-    <AuthContext.Provider value={{ user }}>
+    <AuthContext.Provider value={{ currentUser }}>
       {isLoading ? <Loader color="blue" /> : children}
     </AuthContext.Provider>
   );

@@ -3,13 +3,17 @@ import { Avatar, Text } from "@mantine/core";
 const Message = ({ text, displayName, createAt, photoURL }) => {
   return (
     <div>
-      <div>
+      <div className="flex items-center">
         <Avatar src={photoURL}>A</Avatar>
-        <Text className="ml-1 font-bold">{displayName}</Text>
-        <Text className="me-2.5 text-[11px] text-[#a7a7a7]">{createAt}</Text>
+        <Text ml={4} fw={700}>
+          {displayName}
+        </Text>
+        <Text ml={10} size="xs" variant="#a7a7a7">
+          {createAt}
+        </Text>
       </div>
       <div>
-        <Text className="me-[30px]">{text}</Text>
+        <Text ml={30}>{text}</Text>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { Group, TextInput, Button } from "@mantine/core";
-import { IconSend2 } from "@tabler/icons-react";
+import { SendHorizontal } from "lucide-react";
 import { useState } from "react";
 
 const ChatInputBox = () => {
@@ -26,7 +26,7 @@ const ChatInputBox = () => {
         className="ml-2"
         color="blue"
         radius="lg"
-        leftSection={<IconSend2 />}
+        leftSection={<SendHorizontal />}
       >
         Send
       </Button>

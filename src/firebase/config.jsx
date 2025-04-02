@@ -12,8 +12,17 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   getAdditionalUserInfo,
+  connectAuthEmulator,
 } from "firebase/auth";
-import { getFirestore, doc, collection, setDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  collection,
+  setDoc,
+  serverTimestamp,
+  connectFirestoreEmulator,
+} from "firebase/firestore";
+import { addCollection } from "./services";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDu-li_OO1gNKyl4Y_qPP6V6kQSyRXeIP4",
@@ -35,6 +44,7 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics();
 
 const auth = getAuth();
+
 const fbProvider = new FacebookAuthProvider();
 fbProvider.addScope("public_profile");
 
@@ -42,19 +52,28 @@ const ggProvider = new GoogleAuthProvider();
 
 const db = getFirestore();
 
+if (window.location.hostname === "localhost") {
+  connectAuthEmulator(auth, "http://localhost:9099");
+  connectFirestoreEmulator(db, "localhost", 8080);
+  console.log("connect emulators success");
+}
+
 const loginWithFacebook = async () => {
   try {
     const result = await signInWithPopup(auth, fbProvider);
     const user = result.user;
     if (getAdditionalUserInfo(result)?.isNewUser) {
-      const userRef = doc(collection(db, "users"), user.uid);
-      await setDoc(userRef, {
-        displayName: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        providerId: "facebook.com",
-        createdAt: new Date(),
-      });
+      await addCollection(
+        "users",
+        {
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          providerId: "facebook.com",
+          createdAt: serverTimestamp(),
+        },
+        user.uid
+      );
     }
   } catch (error) {
     console.log("Facebook login fail");
@@ -67,14 +86,17 @@ const loginWithGoogle = async () => {
     const result = await signInWithPopup(auth, ggProvider);
     const user = result.user;
     if (getAdditionalUserInfo(result)?.isNewUser) {
-      const userRef = doc(collection(db, "users"), user.uid);
-      await setDoc(userRef, {
-        displayName: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        providerId: "google.com",
-        createdAt: new Date(),
-      });
+      await addCollection(
+        "users",
+        {
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          providerId: "google.com",
+          createdAt: serverTimestamp(),
+        },
+        user.uid
+      );
     }
   } catch (error) {
     console.log("Google login fail");
@@ -97,14 +119,17 @@ const registerWithEmailAndPassword = async (email, password, name) => {
       displayName: name,
     });
     if (getAdditionalUserInfo(userCredential)?.isNewUser) {
-      const userRef = doc(collection(db, "users"), user.uid);
-      await setDoc(userRef, {
-        displayName: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        providerId: "password",
-        createdAt: new Date(),
-      });
+      await addCollection(
+        "users",
+        {
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          providerId: "password",
+          createdAt: serverTimestamp(),
+        },
+        user.uid
+      );
     }
   } catch (error) {
     if (error.code === "auth/email-already-in-use") {
