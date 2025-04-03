@@ -1,13 +1,25 @@
 import { Group, TextInput, Button } from "@mantine/core";
 import { SendHorizontal } from "lucide-react";
 import { useState } from "react";
+import { useContext } from "react";
+import { AppContext } from "../context/AppProvider";
+import { AuthContext } from "../context/AuthProvider";
+import { sendMessage } from "../../firebase/services";
 
 const ChatInputBox = () => {
-  const [input, setInput] = useState("");
+  const [messageText, setMessageText] = useState("");
+  const { selectedUser } = useContext(AppContext);
+  const { currentUser } = useContext(AuthContext);
 
-  const sendMessage = () => {
-    if (input.trim()) {
-      setInput("");
+  const handleSendMessage = async () => {
+    if (!messageText.trim() || !selectedUser.id || !currentUser.uid) return;
+
+    try {
+      console.log("Sending message:", messageText);
+      await sendMessage(currentUser.uid, selectedUser.id, messageText);
+      setMessageText("");
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
 
@@ -17,15 +29,17 @@ const ChatInputBox = () => {
         className="flex-1"
         radius="lg"
         placeholder="Type a message..."
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        value={messageText}
+        disabled={!selectedUser}
+        onChange={(e) => setMessageText(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
       />
       <Button
-        onClick={sendMessage}
+        onClick={handleSendMessage}
         className="ml-2"
         color="blue"
         radius="lg"
+        disabled={!selectedUser || !messageText.trim()}
         leftSection={<SendHorizontal />}
       >
         Send

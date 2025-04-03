@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase/config";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
-
-const userFirestore = (collectionName, condition) => {
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  orderBy,
+  limit,
+  or,
+} from "firebase/firestore";
+const useFirestore = (collectionName, condition) => {
   const [documents, setDocuments] = useState([]);
 
   useEffect(() => {
@@ -54,4 +61,4 @@ const userFirestore = (collectionName, condition) => {
   return documents;
 };
 
-export default userFirestore;
+export default useFirestore;

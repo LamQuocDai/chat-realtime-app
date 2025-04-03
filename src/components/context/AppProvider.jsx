@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
-import userFirestore from "../../hooks/userFirestore";
+import useFirestore from "../../hooks/useFirestore";
 import { AuthContext } from "./AuthProvider";
+import { auth } from "../../firebase/config";
 
 export const AppContext = createContext();
 
@@ -8,33 +9,21 @@ const AppProvider = ({ children }) => {
   const authData = useContext(AuthContext) || null;
   const [selectedUser, setSelectedUser] = useState(null);
 
-  if (!authData || !authData.currentUser) return children;
-
-  const {
-    currentUser: { uid },
-  } = authData;
-
-  const roomsCondition = useMemo(() => {
-    return {
-      fieldName: "members",
-      operator: "array-contains",
-      compareValue: uid,
-    };
-  }, [uid]);
-
-  // Lay danh sach Chats
-  const chats = userFirestore("chats", roomsCondition);
+  // const {
+  //   currentUser: { uid },
+  // } = authData;
 
   const usersCondition = useMemo(() => {
+    if (!authData || !authData.currentUser) return null;
     return null;
-  }, [uid]);
+  }, [authData]);
 
-  const allUsers = userFirestore("users", usersCondition);
-  const users = allUsers.filter((user) => user.uid !== uid);
+  const uid = authData?.currentUser?.uid;
+
+  const allUsers = useFirestore("users", usersCondition);
+  const users = uid ? allUsers.filter((user) => user.id !== uid) : allUsers;
   return (
-    <AppContext.Provider
-      value={{ chats, users, selectedUser, setSelectedUser }}
-    >
+    <AppContext.Provider value={{ users, selectedUser, setSelectedUser }}>
       {children}
     </AppContext.Provider>
   );

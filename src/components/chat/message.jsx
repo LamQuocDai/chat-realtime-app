@@ -2,7 +2,7 @@ import { Avatar, Text } from "@mantine/core";
 
 const Message = ({ text, displayName, createAt, photoURL }) => {
   return (
-    <div>
+    <div className="">
       <div className="flex items-center">
         <Avatar src={photoURL}>A</Avatar>
         <Text ml={4} fw={700}>

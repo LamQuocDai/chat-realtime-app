@@ -1,4 +1,15 @@
-import { collection, doc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  setDoc,
+  query,
+  where,
+  onSnapshot,
+  orderBy,
+  serverTimestamp,
+  limit,
+  addDoc,
+} from "firebase/firestore";
 import { db } from "./config";
 
 export const addCollection = async (collectionName, data, docId = null) => {
@@ -14,5 +25,35 @@ export const addCollection = async (collectionName, data, docId = null) => {
   } catch (error) {
     console.error(error);
     return null;
+  }
+};
+
+// Hàm thêm tin nhắn mới
+export const sendMessage = async (senderId, receiverId, text) => {
+  try {
+    if (!text.trim() || !senderId || !receiverId) {
+      throw new Error("Missing required fields");
+    }
+
+    console.log("1...");
+
+    const newMessage = {
+      senderId,
+      receiverId,
+      text,
+      createAt: serverTimestamp(),
+    };
+
+    console.log("2...");
+    const docRef = await addDoc(collection(db, "messages"), newMessage);
+
+    console.log("3...");
+    return {
+      id: docRef.id,
+      ...newMessage,
+    };
+  } catch (error) {
+    console.error("Error sending message:", error);
+    throw error;
   }
 };

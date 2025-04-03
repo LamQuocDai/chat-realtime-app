@@ -6,18 +6,22 @@ import {
   TextInput,
   ActionIcon,
   Popover,
-  Button,
+  Loader,
 } from "@mantine/core";
 import { useContext, useState } from "react";
 import { AppContext } from "../context/AppProvider";
 import { Search, Plus } from "lucide-react";
+import { AuthContext } from "../context/AuthProvider";
+import useChatUsers from "../../hooks/useChatUsers";
 
 const Sidebar = () => {
-  const { chats, users, setSelectedUser } = useContext(AppContext);
+  const { users, setSelectedUser } = useContext(AppContext);
   const [searchOpened, setSearchOpened] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const { currentUser } = useContext(AuthContext);
+  const { users: chatUsers, loading } = useChatUsers(currentUser?.uid);
 
-  const filteredUsers = users.filter(
+  const filteredUsers = users?.filter(
     (u) =>
       u.displayName &&
       u.displayName.toLowerCase().includes(searchValue.toLowerCase())
@@ -93,7 +97,41 @@ const Sidebar = () => {
       </Popover>
 
       <Divider my="sm" color="gray" />
-      <ul>
+      {loading ? (
+        <div className="flex justify-center p-4">
+          <Loader color="white" size="sm" />
+        </div>
+      ) : chatUsers.length > 0 ? (
+        <div className="space-y-2 mt-2">
+          {chatUsers.map((user) => (
+            <div
+              key={user.id}
+              className="p-2 bg-gray-800 hover:bg-gray-700 rounded cursor-pointer"
+              onClick={() => selectUserForChat(user)}
+            >
+              <Group>
+                <Avatar src={user.photoURL} radius="xl">
+                  {user.displayName?.charAt(0) || "U"}
+                </Avatar>
+                <div>
+                  <Text c="white" size="sm" fw={500}>
+                    {user.displayName}
+                  </Text>
+                  <Text c="gray.4" size="xs">
+                    {/* Nếu có lastMessage, hiển thị ở đây */}
+                    Tap to chat
+                  </Text>
+                </div>
+              </Group>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Text c="gray.4" size="sm" align="center" mt={2}>
+          No recent chats
+        </Text>
+      )}
+      {/* <ul>
         {chats &&
           chats.length > 0 &&
           chats.map((room) => (
@@ -104,7 +142,7 @@ const Sidebar = () => {
               </Group>
             </li>
           ))}
-      </ul>
+      </ul> */}
     </div>
   );
 };
