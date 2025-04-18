@@ -16,9 +16,6 @@ import {
 } from "firebase/auth";
 import {
   getFirestore,
-  doc,
-  collection,
-  setDoc,
   serverTimestamp,
   connectFirestoreEmulator,
 } from "firebase/firestore";
@@ -52,7 +49,7 @@ const ggProvider = new GoogleAuthProvider();
 
 const db = getFirestore();
 
-if (window.location.hostname === "localhost") {
+if (window.location.hostname === "localhost" && !window.useRealFirebase) {
   connectAuthEmulator(auth, "http://localhost:9099");
   connectFirestoreEmulator(db, "localhost", 8080);
   console.log("connect emulators success");
@@ -61,6 +58,7 @@ if (window.location.hostname === "localhost") {
 const loginWithFacebook = async () => {
   try {
     const result = await signInWithPopup(auth, fbProvider);
+
     const user = result.user;
     if (getAdditionalUserInfo(result)?.isNewUser) {
       await addCollection(

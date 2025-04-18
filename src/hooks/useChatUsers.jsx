@@ -7,6 +7,7 @@ import {
   onSnapshot,
   or,
   getDocs,
+  orderBy,
 } from "firebase/firestore";
 
 /**
@@ -15,7 +16,9 @@ import {
 const useChatUsers = (currentUserId) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [lastMessages, setLastMessages] = useState({});
 
+  //Fetch chat users
   useEffect(() => {
     if (!currentUserId) {
       setUsers([]);
@@ -23,83 +26,93 @@ const useChatUsers = (currentUserId) => {
       return;
     }
 
-    const fetchChatUsers = async () => {
-      try {
-        setLoading(true);
+    setLoading(true);
 
-        // Query tất cả tin nhắn mà người dùng hiện tại đã gửi hoặc nhận
-        const messagesRef = collection(db, "messages");
-        const q = query(
-          messagesRef,
-          or(
-            where("senderId", "==", currentUserId),
-            where("receiverId", "==", currentUserId)
-          )
-        );
+    // Get messages where current user is sender or receiver
+    const messagesRef = collection(db, "messages");
+    const q = query(
+      messagesRef,
+      or(
+        where("senderId", "==", currentUserId),
+        where("receiverId", "==", currentUserId)
+      ),
+      orderBy("createdAt", "desc")
+    );
 
-        const querySnapshot = await getDocs(q);
-
-        // Tạo một Set để lưu trữ các ID người dùng duy nhất
-        const userIds = new Set();
-
-        // Lặp qua tất cả tin nhắn và thêm ID người dùng vào Set
-        querySnapshot.forEach((doc) => {
-          const message = doc.data();
-
-          // Thêm người gửi (nếu không phải là người dùng hiện tại)
-          if (message.senderId !== currentUserId) {
-            userIds.add(message.senderId);
-          }
-
-          // Thêm người nhận (nếu không phải là người dùng hiện tại)
-          if (message.receiverId !== currentUserId) {
-            userIds.add(message.receiverId);
-          }
-        });
-
-        // Chuyển đổi Set thành mảng
-        const uniqueUserIds = Array.from(userIds);
-
-        if (uniqueUserIds.length === 0) {
-          setUsers([]);
-          setLoading(false);
-          return;
-        }
-
-        // Lấy thông tin chi tiết của từng người dùng
-        const usersRef = collection(db, "users");
-
-        // Listen for real-time updates on these users
-        const unsubscribe = onSnapshot(
-          usersRef,
-          (snapshot) => {
-            const usersData = snapshot.docs
-              .map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-              }))
-              .filter((user) => uniqueUserIds.includes(user.id));
-
-            setUsers(usersData);
-            setLoading(false);
-          },
-          (error) => {
-            console.error("Error getting chat users:", error);
-            setLoading(false);
-          }
-        );
-
-        return unsubscribe;
-      } catch (error) {
-        console.error("Error in useChatUsers:", error);
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      if (snapshot.empty) {
+        setUsers([]);
         setLoading(false);
+        return;
       }
-    };
 
-    fetchChatUsers();
+      // Extract unique user IDs and their last messages
+      const userMessagesMap = {};
+
+      snapshot.docs.forEach((doc) => {
+        const message = doc.data();
+        const otherUserId =
+          message.senderId === currentUserId
+            ? message.receiverId
+            : message.senderId;
+
+        // Only store the first message for each user
+        if (!userMessagesMap[otherUserId]) {
+          userMessagesMap[otherUserId] = {
+            lastMessage: {
+              id: doc.id,
+              ...message,
+            },
+            lastMessageTime: message.createdAt,
+          };
+        }
+      });
+
+      // Get user details for each user ID
+      const userIds = Object.keys(userMessagesMap);
+
+      if (userIds.length === 0) {
+        setUsers([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch user details from users collection
+      const usersRef = collection(db, "users");
+      const usersSnapshot = await getDocs(usersRef);
+
+      const usersData = [];
+
+      usersSnapshot.docs.forEach((doc) => {
+        const userData = doc.data();
+        if (userIds.includes(doc.id) && doc.id !== currentUserId) {
+          const userWithLastMessage = {
+            id: doc.id,
+            ...userData,
+            lastMessage: userMessagesMap[doc.id].lastMessage,
+            lastTimestamp: userMessagesMap[doc.id].lastTimestamp,
+          };
+          usersData.push(userWithLastMessage);
+        }
+      });
+
+      // Sort users by last message time
+      usersData.sort((a, b) => b.lastTimestamp - a.lastTimestamp);
+      setUsers(usersData);
+      setLoading(false);
+
+      // Store last message in a separate state
+      const lastMsgs = {};
+      usersData.forEach((user) => {
+        lastMsgs[user.id] = user.lastMessage;
+      });
+      setLastMessages(lastMsgs);
+    });
+
+    return () => unsubscribe();
   }, [currentUserId]);
 
-  return { users, loading };
+  return { users, loading, lastMessages };
 };
 
 export default useChatUsers;

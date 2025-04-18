@@ -35,7 +35,7 @@ const useMessages = (currentUserId, selectedUserId) => {
           where("receiverId", "==", currentUserId)
         )
       ),
-      orderBy("createAt"),
+      orderBy("createdAt"),
       limit(20)
     );
 

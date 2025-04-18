@@ -21,6 +21,7 @@ const AppProvider = ({ children }) => {
   const uid = authData?.currentUser?.uid;
 
   const allUsers = useFirestore("users", usersCondition);
+
   const users = uid ? allUsers.filter((user) => user.id !== uid) : allUsers;
   return (
     <AppContext.Provider value={{ users, selectedUser, setSelectedUser }}>

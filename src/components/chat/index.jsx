@@ -6,11 +6,11 @@ import ChatRoom from "./ChatRoom";
 
 export default function ChatPage() {
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-gray-100 overflow-hidden">
       {/* Navbar */}
       <Narbar />
 
-      <div className="flex flex-row h-full">
+      <div className="flex flex-row h-full overflow-hidden">
         {/* Sidebar */}
         <Sidebar />
         {/* Chat Area */}

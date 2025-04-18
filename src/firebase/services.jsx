@@ -2,12 +2,7 @@ import {
   collection,
   doc,
   setDoc,
-  query,
-  where,
-  onSnapshot,
-  orderBy,
   serverTimestamp,
-  limit,
   addDoc,
 } from "firebase/firestore";
 import { db } from "./config";
@@ -41,7 +36,7 @@ export const sendMessage = async (senderId, receiverId, text) => {
       senderId,
       receiverId,
       text,
-      createAt: serverTimestamp(),
+      createdAt: serverTimestamp(),
     };
 
     console.log("2...");

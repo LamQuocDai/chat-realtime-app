@@ -8,11 +8,12 @@ import {
   Popover,
   Loader,
 } from "@mantine/core";
-import { useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import { AppContext } from "../context/AppProvider";
 import { Search, Plus } from "lucide-react";
 import { AuthContext } from "../context/AuthProvider";
 import useChatUsers from "../../hooks/useChatUsers";
+import useRecentChats from "../../hooks/useRecentChats";
 
 const Sidebar = () => {
   const { users, setSelectedUser } = useContext(AppContext);
@@ -20,6 +21,9 @@ const Sidebar = () => {
   const [searchValue, setSearchValue] = useState("");
   const { currentUser } = useContext(AuthContext);
   const { users: chatUsers, loading } = useChatUsers(currentUser?.uid);
+  const { recentChats } = useRecentChats(currentUser?.uid);
+
+  useEffect(() => {}, [chatUsers]);
 
   const filteredUsers = users?.filter(
     (u) =>
@@ -30,6 +34,12 @@ const Sidebar = () => {
   const selectUserForChat = async (selectedUser) => {
     setSelectedUser(selectedUser);
     setSearchOpened(false);
+  };
+
+  // Hàm rút gọn tin nhắn cho sidebar
+  const truncateMessage = (text, maxLength = 25) => {
+    if (!text) return "";
+    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
   };
 
   return (
@@ -101,9 +111,9 @@ const Sidebar = () => {
         <div className="flex justify-center p-4">
           <Loader color="white" size="sm" />
         </div>
-      ) : chatUsers.length > 0 ? (
+      ) : recentChats.length > 0 ? (
         <div className="space-y-2 mt-2">
-          {chatUsers.map((user) => (
+          {recentChats.map((user) => (
             <div
               key={user.id}
               className="p-2 bg-gray-800 hover:bg-gray-700 rounded cursor-pointer"
@@ -118,8 +128,16 @@ const Sidebar = () => {
                     {user.displayName}
                   </Text>
                   <Text c="gray.4" size="xs">
-                    {/* Nếu có lastMessage, hiển thị ở đây */}
-                    Tap to chat
+                    {user.lastMessage ? (
+                      <>
+                        {user.lastMessage.senderId === currentUser.uid && (
+                          <span>Bạn: </span>
+                        )}
+                        {truncateMessage(user.lastMessage.text)}
+                      </>
+                    ) : (
+                      "Tap to chat"
+                    )}
                   </Text>
                 </div>
               </Group>
@@ -131,18 +149,6 @@ const Sidebar = () => {
           No recent chats
         </Text>
       )}
-      {/* <ul>
-        {chats &&
-          chats.length > 0 &&
-          chats.map((room) => (
-            <li className="p-3 bg-white rounded-lg mb-2 cursor-pointer hover:bg-gray-200">
-              <Group>
-                <Avatar src="" alt="Alice" radius="xl" size="lg" />
-                <Text size="xl">Alice</Text>
-              </Group>
-            </li>
-          ))}
-      </ul> */}
     </div>
   );
 };
