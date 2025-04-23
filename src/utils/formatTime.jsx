@@ -1,22 +1,27 @@
 // Hàm định dạng thời gian an toàn
 export const formatTime = (timestamp) => {
-  if (!timestamp) return "";
+  if (!timestamp) return ""; // Nếu timestamp là null hoặc undefined
 
-  try {
-    // Nếu là Firestore timestamp
-    if (timestamp && typeof timestamp.toDate === "function") {
-      return timestamp.toDate().toLocaleTimeString();
-    }
+  // Kiểm tra các kiểu timestamp khác nhau
+  let date;
 
-    // Nếu là Unix timestamp (seconds)
-    if (typeof timestamp === "number" && timestamp < 2000000000) {
-      return new Date(timestamp * 1000).toLocaleTimeString();
-    }
-
-    // Nếu là milliseconds
-    return new Date(timestamp).toLocaleTimeString();
-  } catch (error) {
-    console.error("Error formatting date:", error, timestamp);
-    return "Thời gian không hợp lệ";
+  // Kiểm tra nếu là Firestore Timestamp
+  if (timestamp && typeof timestamp.toDate === "function") {
+    date = timestamp.toDate();
   }
+  // Nếu là timestamp Unix (số)
+  else if (typeof timestamp === "number") {
+    date = new Date(timestamp);
+  }
+  // Nếu đã là Date object
+  else if (timestamp instanceof Date) {
+    date = timestamp;
+  }
+  // Trường hợp khác - có thể không xử lý được
+  else {
+    console.log("Unknown timestamp format:", timestamp);
+    return "";
+  }
+
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };

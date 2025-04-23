@@ -1,6 +1,6 @@
 import { Avatar, Text } from "@mantine/core";
 
-const Message = ({ text, displayName, createAt, photoURL }) => {
+const Message = ({ text, displayName, createdAt, photoURL }) => {
   return (
     <div className="">
       <div className="flex items-center">
@@ -9,7 +9,7 @@ const Message = ({ text, displayName, createAt, photoURL }) => {
           {displayName}
         </Text>
         <Text ml={10} size="xs" variant="#a7a7a7">
-          {createAt}
+          {createdAt}
         </Text>
       </div>
       <div>

@@ -1,6 +1,4 @@
 import { initializeApp } from "firebase/app";
-
-import { getAnalytics } from "firebase/analytics";
 import {
   getAuth,
   FacebookAuthProvider,
@@ -38,7 +36,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics();
 
 const auth = getAuth();
 
@@ -49,6 +46,10 @@ const ggProvider = new GoogleAuthProvider();
 
 const db = getFirestore();
 
+// Uncomment the line below to use real Firebase in localhost
+// window.useRealFirebase = true;
+
+// Comment the line below to use real Firebase in localhost
 if (window.location.hostname === "localhost" && !window.useRealFirebase) {
   connectAuthEmulator(auth, "http://localhost:9099");
   connectFirestoreEmulator(db, "localhost", 8080);
