@@ -38,16 +38,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const auth = getAuth();
+const db = getFirestore();
 
 const fbProvider = new FacebookAuthProvider();
 fbProvider.addScope("public_profile");
 
 const ggProvider = new GoogleAuthProvider();
 
-const db = getFirestore();
-
 // Uncomment the line below to use real Firebase in localhost
-// window.useRealFirebase = true;
+window.useRealFirebase = true;
 
 // Comment the line below to use real Firebase in localhost
 if (window.location.hostname === "localhost" && !window.useRealFirebase) {

@@ -30,8 +30,6 @@ export const sendMessage = async (senderId, receiverId, text) => {
       throw new Error("Missing required fields");
     }
 
-    console.log("1...");
-
     const newMessage = {
       senderId,
       receiverId,
@@ -39,10 +37,8 @@ export const sendMessage = async (senderId, receiverId, text) => {
       createdAt: serverTimestamp(),
     };
 
-    console.log("2...");
     const docRef = await addDoc(collection(db, "messages"), newMessage);
 
-    console.log("3...");
     return {
       id: docRef.id,
       ...newMessage,

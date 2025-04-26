@@ -42,8 +42,6 @@ const useRecentChats = (currentUserId) => {
         return;
       }
 
-      console.log("Found messages:", snapshot.docs.length);
-
       // 2. Tạo Map để lưu người dùng và tin nhắn mới nhất của họ
       const userLastMessageMap = new Map();
 
@@ -85,7 +83,6 @@ const useRecentChats = (currentUserId) => {
         return timeB - timeA;
       });
 
-      console.log("Recent chats:", usersData.length);
       setRecentChats(usersData);
       setLoading(false);
     });

@@ -15,7 +15,6 @@ const ChatInputBox = () => {
     if (!messageText.trim() || !selectedUser.id || !currentUser.uid) return;
 
     try {
-      console.log("Sending message:", messageText);
       await sendMessage(currentUser.uid, selectedUser.id, messageText);
       setMessageText("");
     } catch (error) {
